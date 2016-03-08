@@ -23,37 +23,34 @@
 
 using namespace mbed::util;
 
-#if YOTTA_CFG_HARDWARE_WEARABLE_REFERENCE_DESIGN_GPIO_EXPANDER_PRESENT
+#if YOTTA_CFG_HARDWARE_WRD_GPIO_EXPANDER_PRESENT
 namespace GPIOSwitch
 {
 
-#define LOCATION_SIZE YOTTA_CFG_HARDWARE_WEARABLE_REFERENCE_DESIGN_GPIO_EXPANDER_SIZE
+#define LOCATION_SIZE YOTTA_CFG_HARDWARE_WRD_GPIO_EXPANDER_SIZE
+
 #if (LOCATION_SIZE == 1)
 static uint32_t locationValues[1] = { 0 };
-static uint16_t locationAddress[1] = { YOTTA_CFG_HARDWARE_WEARABLE_REFERENCE_DESIGN_GPIO_EXPANDER_GPIO0_I2C_ADDRESS };
+static uint16_t locationAddress[1] = { YOTTA_CFG_HARDWARE_WRD_GPIO_EXPANDER_GPIO0_I2C_ADDRESS };
 
-static GPIOExpander gpio[1] = { { YOTTA_CFG_HARDWARE_WEARABLE_REFERENCE_DESIGN_GPIO_EXPANDER_GPIO0_I2C_SDA,
-                                  YOTTA_CFG_HARDWARE_WEARABLE_REFERENCE_DESIGN_GPIO_EXPANDER_GPIO0_I2C_SCL,
-                                  YOTTA_CFG_HARDWARE_WEARABLE_REFERENCE_DESIGN_GPIO_EXPANDER_GPIO0_I2C_ADDRESS,
-                                  YOTTA_CFG_HARDWARE_WEARABLE_REFERENCE_DESIGN_GPIO_EXPANDER_GPIO0_IRQ_PIN} };
+static GPIOExpander gpio[1] = { { YOTTA_CFG_HARDWARE_WRD_GPIO_EXPANDER_GPIO0_I2C_SDA,
+                                  YOTTA_CFG_HARDWARE_WRD_GPIO_EXPANDER_GPIO0_I2C_SCL,
+                                  YOTTA_CFG_HARDWARE_WRD_GPIO_EXPANDER_GPIO0_I2C_ADDRESS,
+                                  YOTTA_CFG_HARDWARE_WRD_GPIO_EXPANDER_GPIO0_IRQ_PIN} };
 
 #elif (LOCATION_SIZE == 2)
 static uint32_t locationValues[2] = { 0, 0 };
-static uint16_t locationAddress[2] = { YOTTA_CFG_HARDWARE_WEARABLE_REFERENCE_DESIGN_GPIO_EXPANDER_GPIO0_I2C_ADDRESS,
-                                       YOTTA_CFG_HARDWARE_WEARABLE_REFERENCE_DESIGN_GPIO_EXPANDER_GPIO1_I2C_ADDRESS };
+static uint16_t locationAddress[2] = { YOTTA_CFG_HARDWARE_WRD_GPIO_EXPANDER_GPIO0_I2C_ADDRESS,
+                                       YOTTA_CFG_HARDWARE_WRD_GPIO_EXPANDER_GPIO1_I2C_ADDRESS };
 
-static GPIOExpander gpio[2] = { { YOTTA_CFG_HARDWARE_WEARABLE_REFERENCE_DESIGN_GPIO_EXPANDER_GPIO0_I2C_SDA,
-                                  YOTTA_CFG_HARDWARE_WEARABLE_REFERENCE_DESIGN_GPIO_EXPANDER_GPIO0_I2C_SCL,
-                                  YOTTA_CFG_HARDWARE_WEARABLE_REFERENCE_DESIGN_GPIO_EXPANDER_GPIO0_I2C_ADDRESS,
-                                  YOTTA_CFG_HARDWARE_WEARABLE_REFERENCE_DESIGN_GPIO_EXPANDER_GPIO0_IRQ_PIN},
-                                { YOTTA_CFG_HARDWARE_WEARABLE_REFERENCE_DESIGN_GPIO_EXPANDER_GPIO1_I2C_SDA,
-                                  YOTTA_CFG_HARDWARE_WEARABLE_REFERENCE_DESIGN_GPIO_EXPANDER_GPIO1_I2C_SCL,
-                                  YOTTA_CFG_HARDWARE_WEARABLE_REFERENCE_DESIGN_GPIO_EXPANDER_GPIO1_I2C_ADDRESS,
-                                  YOTTA_CFG_HARDWARE_WEARABLE_REFERENCE_DESIGN_GPIO_EXPANDER_GPIO1_IRQ_PIN} };
-
-#else
-static uint32_t locationValues[1] = { 0 };
-static uint16_t locationAddress[1] = { 0 };
+static GPIOExpander gpio[2] = { { YOTTA_CFG_HARDWARE_WRD_GPIO_EXPANDER_GPIO0_I2C_SDA,
+                                  YOTTA_CFG_HARDWARE_WRD_GPIO_EXPANDER_GPIO0_I2C_SCL,
+                                  YOTTA_CFG_HARDWARE_WRD_GPIO_EXPANDER_GPIO0_I2C_ADDRESS,
+                                  YOTTA_CFG_HARDWARE_WRD_GPIO_EXPANDER_GPIO0_IRQ_PIN},
+                                { YOTTA_CFG_HARDWARE_WRD_GPIO_EXPANDER_GPIO1_I2C_SDA,
+                                  YOTTA_CFG_HARDWARE_WRD_GPIO_EXPANDER_GPIO1_I2C_SCL,
+                                  YOTTA_CFG_HARDWARE_WRD_GPIO_EXPANDER_GPIO1_I2C_ADDRESS,
+                                  YOTTA_CFG_HARDWARE_WRD_GPIO_EXPANDER_GPIO1_IRQ_PIN} };
 #endif
 
     typedef enum {
@@ -111,9 +108,8 @@ static uint16_t locationAddress[1] = { 0 };
     std::queue<SharedPointer<Transaction > > sendQueue;
     minar::callback_handle_t processQueueHandle = NULL;
 }
-#endif
 
-void GPIOSwitch::enqueueTransaction(SharedPointer<Transaction> transaction)
+static void GPIOSwitch::enqueueTransaction(SharedPointer<Transaction> transaction)
 {
     sendQueue.push(transaction);
 
@@ -125,12 +121,12 @@ void GPIOSwitch::enqueueTransaction(SharedPointer<Transaction> transaction)
     }
 }
 
-void GPIOSwitch::processQueueLander(void)
+static void GPIOSwitch::processQueueLander(void)
 {
     processQueueDone(0);
 }
 
-void GPIOSwitch::processQueueDone(uint32_t values)
+static void GPIOSwitch::processQueueDone(uint32_t values)
 {
     SharedPointer<Transaction> transaction = sendQueue.front();
     sendQueue.pop();
@@ -175,7 +171,7 @@ void GPIOSwitch::processQueueDone(uint32_t values)
     }
 }
 
-void GPIOSwitch::processQueue(void)
+static void GPIOSwitch::processQueue(void)
 {
     // only process if queue is not empty
     if (sendQueue.size() > 0)
@@ -208,11 +204,17 @@ void GPIOSwitch::processQueue(void)
         }
     }
 }
+#endif // end YOTTA_CFG_HARDWARE_WRD_GPIO_EXPANDER_PRESENT
+
+/*****************************************************************************/
+/* Public GPIOSwitch API                                                     */
+/*****************************************************************************/
 
 bool GPIOSwitch::readInput(uint8_t pin, uint16_t location, FunctionPointer1<void, int> callback)
 {
     bool result = false;
 
+#if YOTTA_CFG_HARDWARE_WRD_GPIO_EXPANDER_PRESENT
     for (uint8_t index = 0; index < LOCATION_SIZE; index++)
     {
         if (location == locationAddress[index])
@@ -227,6 +229,11 @@ bool GPIOSwitch::readInput(uint8_t pin, uint16_t location, FunctionPointer1<void
             break;
         }
     }
+#else
+    (void) pin;
+    (void) location;
+    (void) callback;
+#endif
 
     return result;
 }
@@ -235,6 +242,7 @@ int GPIOSwitch::readOutput(uint8_t pin, uint16_t location)
 {
     int result = -1;
 
+#if YOTTA_CFG_HARDWARE_WRD_GPIO_EXPANDER_PRESENT
     for (uint8_t index = 0; index < LOCATION_SIZE; index++)
     {
         if (location == locationAddress[index])
@@ -243,6 +251,10 @@ int GPIOSwitch::readOutput(uint8_t pin, uint16_t location)
             break;
         }
     }
+#else
+    (void) pin;
+    (void) location;
+#endif
 
     return result;
 }
@@ -251,6 +263,7 @@ bool GPIOSwitch::writeOutput(uint8_t pin, uint16_t location, int8_t value)
 {
     bool result = false;
 
+#if YOTTA_CFG_HARDWARE_WRD_GPIO_EXPANDER_PRESENT
     for (uint8_t index = 0; index < LOCATION_SIZE; index++)
     {
         if (location == locationAddress[index])
@@ -276,6 +289,11 @@ bool GPIOSwitch::writeOutput(uint8_t pin, uint16_t location, int8_t value)
             break;
         }
     }
+#else
+    (void) pin;
+    (void) location;
+    (void) value;
+#endif
 
     return result;
 }
@@ -284,6 +302,7 @@ bool GPIOSwitch::writeOutput(uint8_t pin, uint16_t location, int8_t value, Funct
 {
     bool result = false;
 
+#if YOTTA_CFG_HARDWARE_WRD_GPIO_EXPANDER_PRESENT
     for (uint8_t index = 0; index < LOCATION_SIZE; index++)
     {
         if (location == locationAddress[index])
@@ -309,6 +328,12 @@ bool GPIOSwitch::writeOutput(uint8_t pin, uint16_t location, int8_t value, Funct
             break;
         }
     }
+#else
+    (void) pin;
+    (void) location;
+    (void) value;
+    (void) callback;
+#endif
 
     return result;
 }
@@ -317,6 +342,7 @@ bool GPIOSwitch::setDirection(uint8_t pin, uint16_t location, int8_t direction)
 {
     bool result = false;
 
+#if YOTTA_CFG_HARDWARE_WRD_GPIO_EXPANDER_PRESENT
     for (uint8_t index = 0; index < LOCATION_SIZE; index++)
     {
         if (location == locationAddress[index])
@@ -331,6 +357,11 @@ bool GPIOSwitch::setDirection(uint8_t pin, uint16_t location, int8_t direction)
             break;
         }
     }
+#else
+    (void) pin;
+    (void) location;
+    (void) direction;
+#endif
 
     return result;
 }

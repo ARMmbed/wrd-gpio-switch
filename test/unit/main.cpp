@@ -19,8 +19,13 @@
 
 #include "wrd-gpio-switch/DigitalOutEx.h"
 
+#if YOTTA_CFG_HARDWARE_WRD_LED_PRESENT
+#else
+#error missing WRD LED configuration
+#endif
 
-DigitalOutEx led(6, 0x42);
+DigitalOutEx led(YOTTA_CFG_HARDWARE_WRD_LED_LED0_PIN,
+                 YOTTA_CFG_HARDWARE_WRD_LED_LED0_LOCATION);
 
 void toggleLed()
 {
