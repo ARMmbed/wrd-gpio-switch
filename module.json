@@ -1,6 +1,6 @@
 {
   "name": "wrd-gpio-switch",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Wearable Reference Design GPIO switch.",
   "keywords": [],
   "author": "Marcus Chang <marcus.chang@arm.com>",
