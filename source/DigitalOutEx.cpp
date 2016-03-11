@@ -16,6 +16,7 @@
  */
 
 #include "wrd-gpio-switch/DigitalOutEx.h"
+#include "wrd-gpio-switch/GPIOSwitch.h"
 
 DigitalOutEx::DigitalOutEx(uint32_t _pin, uint32_t _location)
     :   pin(_pin),
@@ -23,6 +24,7 @@ DigitalOutEx::DigitalOutEx(uint32_t _pin, uint32_t _location)
 {
     if (location)
     {
+        GPIOSwitch::writeOutputTask(pin, location, 0);
         GPIOSwitch::setDirection(pin, location, 1);
     }
     else
@@ -37,8 +39,8 @@ DigitalOutEx::DigitalOutEx(uint32_t _pin, int value, uint32_t _location)
 {
     if (location)
     {
+        GPIOSwitch::writeOutputTask(pin, location, value);
         GPIOSwitch::setDirection(pin, location, 1);
-        GPIOSwitch::writeOutput(pin, location, value);
     }
     else
     {
@@ -50,7 +52,7 @@ void DigitalOutEx::write(int value)
 {
     if (location)
     {
-        GPIOSwitch::writeOutput(pin, location, value);
+        GPIOSwitch::writeOutputIrq(pin, location, value);
     }
     else
     {

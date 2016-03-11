@@ -19,8 +19,6 @@
 #define __WRD_GPIO_DIGITAL_OUT_EX_H__
 
 #include "mbed-drivers/mbed.h"
-#include "wrd-gpio-switch/GPIOSwitch.h"
-
 #include "core-util/SharedPointer.h"
 
 using namespace mbed::util;
@@ -30,57 +28,64 @@ class DigitalOutEx
 public:
 
     /**
-     * @brief [brief description]
-     * @details [long description]
+     * @brief Create a DigitalOutEx connected to the pin and location.
+     * @details The optional location specifies which IC the I/O pin is on.
+     *          The main MCU is location 0. For I2C I/O expanders, the location
+     *          is the I2C address.
      *
-     * @param pin [description]
-     * @param location [description]
+     * @param pin digital pin to connect to.
+     * @param location digital pin location.
      */
     DigitalOutEx(uint32_t pin, uint32_t location = 0);
 
     /**
-     * @brief [brief description]
-     * @details [long description]
+     * @brief Create a DigitalOutEx connected to the pin and location
+     *        with a default value.
+     * @details The optional location specifies which IC the I/O pin is on.
+     *          The main MCU is location 0. For I2C I/O expanders, the location
+     *          is the I2C address.
      *
-     * @param pin [description]
-     * @param value [description]
-     * @param location [description]
+     * @param pin digital pin to connect to.
+     * @param value pin out, 1 high, 0 low.
+     * @param location digital pin location.
      */
     DigitalOutEx(uint32_t pin, int value, uint32_t location);
 
     /**
      * @brief Return the output setting, represented as 0 or 1 (int).
-     * @details [long description]
      * @return An integer representing the output setting of the pin,
      *         0 for logical 0, 1 for logical 1
      */
     int read();
 
     /**
-     * @brief Set the output, specified as 0 or 1 (int)
-     * @details [long description]
+     * @brief Set the output, specified as 0 or 1 (int).
+     * @details Commands to external I/O expanders are queued up and processed
+     *          sequentially. Use asynchronous API for better timing control.
      *
      * @param value An integer specifying the pin output value, 0 for logical 0,
-     *              1 (or any other non-zero value) for logical 1
+     *              1 (or any other non-zero value) for logical 1.
      */
     void write(int value);
 
     /**
-     * @brief [brief description]
-     * @details [long description]
+     * @brief Set the output, specified as 0 or 1 (int).
+     * @details The callback can be used to chain operations.
      *
-     * @param value [description]
-     * @param callback [description]
+     * @param value An integer specifying the pin output value, 0 for logical 0,
+     *              1 (or any other non-zero value) for logical 1.
+     * @param callback The function to call once the new value has been applied.
      */
     void write(int value, FunctionPointer0<void> callback);
 
     /**
-     * @brief [brief description]
-     * @details [long description]
+     * @brief Set the output, specified as 0 or 1 (int).
+     * @details The callback can be used to chain operations.
      *
-     * @param value [description]
-     * @param object [description]
-     * @param member [description]
+     * @param value An integer specifying the pin output value, 0 for logical 0,
+     *              1 (or any other non-zero value) for logical 1.
+     * @param object Pointer to object to perform callback on.
+     * @param member Pointer to member function in object.
      */
     template <typename T>
     void write(int value, T* object, void (T::*member)(void))
@@ -90,13 +95,11 @@ public:
     }
 
 #ifdef MBED_OPERATORS
-
     /**
-     * @brief A shorthand for read()
-     * @details [long description]
+     * @brief A shorthand for read().
      *
-     * @param read [description]
-     * @return [description]
+     * @return An integer representing the output setting of the pin,
+     *         0 for logical 0, 1 for logical 1
      */
     operator int()
     {
@@ -104,10 +107,7 @@ public:
     }
 
     /**
-     * @brief [brief description]
-     * @details [long description]
-     *
-     * @param value [description]
+     * @brief A shorthand for write().
      */
     DigitalOutEx& operator=(int value)
     {
@@ -116,10 +116,7 @@ public:
     }
 
     /**
-     * @brief [brief description]
-     * @details [long description]
-     *
-     * @param rhs [description]
+     * @brief Assignment operator.
      */
     DigitalOutEx& operator=(DigitalOutEx& rhs)
     {
