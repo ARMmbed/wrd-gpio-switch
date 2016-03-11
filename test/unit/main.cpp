@@ -18,19 +18,42 @@
 #include "mbed-drivers/mbed.h"
 
 #include "wrd-gpio-switch/DigitalOutEx.h"
+#include "wrd-gpio-switch/InterruptInEx.h"
 
 #if YOTTA_CFG_HARDWARE_WRD_LED_PRESENT
 #else
 #error missing WRD LED configuration
 #endif
 
-DigitalOutEx led(YOTTA_CFG_HARDWARE_WRD_LED_LED0_PIN,
-                 YOTTA_CFG_HARDWARE_WRD_LED_LED0_LOCATION);
+#if (YOTTA_CFG_HARDWARE_WRD_BUTTON_SIZE > 0) && \
+    (YOTTA_CFG_HARDWARE_WRD_LED_SIZE > 0)
+#define BUTTON_0_ENABLED
+InterruptInEx button0(YOTTA_CFG_HARDWARE_WRD_BUTTON_BUTTON0_PIN,
+                      YOTTA_CFG_HARDWARE_WRD_BUTTON_BUTTON0_LOCATION);
 
-void toggleLed()
+DigitalOutEx led0(YOTTA_CFG_HARDWARE_WRD_LED_LED0_PIN,
+                  YOTTA_CFG_HARDWARE_WRD_LED_LED0_LOCATION);
+
+static void toggleLed0()
 {
-    led = !led;
+    led0 = !led0;
 }
+#endif
+
+#if (YOTTA_CFG_HARDWARE_WRD_BUTTON_SIZE > 1) && \
+    (YOTTA_CFG_HARDWARE_WRD_LED_SIZE > 1)
+#define BUTTON_1_ENABLED
+InterruptInEx button1(YOTTA_CFG_HARDWARE_WRD_BUTTON_BUTTON1_PIN,
+                      YOTTA_CFG_HARDWARE_WRD_BUTTON_BUTTON1_LOCATION);
+
+DigitalOutEx led1(YOTTA_CFG_HARDWARE_WRD_LED_LED1_PIN,
+                  YOTTA_CFG_HARDWARE_WRD_LED_LED1_LOCATION);
+
+static void toggleLed1()
+{
+    led1 = !led1;
+}
+#endif
 
 /*****************************************************************************/
 /* App start                                                                 */
@@ -38,6 +61,11 @@ void toggleLed()
 
 void app_start(int, char *[])
 {
-    minar::Scheduler::postCallback(toggleLed)
-        .period(minar::milliseconds(1000));
+#ifdef BUTTON_0_ENABLED
+    button0.fall(toggleLed0);
+#endif
+
+#ifdef BUTTON_1_ENABLED
+    button1.fall(toggleLed1);
+#endif
 }
