@@ -25,55 +25,99 @@ using namespace mbed::util;
 namespace GPIOSwitch
 {
     /**
-     * @brief [brief description]
-     * @details [long description]
+     * @brief Read pin value from external I/O device.
+     * @details All calls are processed through a FIFO queue.
      *
-     * @param pin [description]
-     * @param location [description]
-     * @param callback [description]
+     * @param pin Zero indexed pin number.
+     * @param location Address for external I/O device. For I2C devices,
+     *                 the I2C address is the location.
+     * @param callback Function to call with pin value as parameter.
+     * @return bool true command accepted by location, false location not found.
      */
     bool readInput(uint8_t pin, uint16_t location, FunctionPointer1<void, int> callback);
 
     /**
-     * @brief [brief description]
-     * @details [long description]
+     * @brief Read output value for a pin on an external I/O device.
+     * @details A cached value is returned and not read from the device for optimization.
      *
-     * @param pin [description]
-     * @param location [description]
+     * @param pin Zero indexed pin number.
+     * @param location Address for external I/O device. For I2C devices,
+     *                 the I2C address is the location.
+     * @return pin value. 0 is low, 1 is high.
      */
     int readOutput(uint8_t pin, uint16_t location);
 
     /**
-     * @brief [brief description]
-     * @details [long description]
+     * @brief Set output pin value. This function is safe to call from interrupt context.
+     * @details Calls writeOutputTask through MINAR to decouple from interrupt context.
      *
-     * @param pin [description]
-     * @param location [description]
-     * @param value [description]
+     * @param pin Zero indexed pin number.
+     * @param location Address for external I/O device. For I2C devices,
+     *                 the I2C address is the location.
+     * @param value pin value. 0 is low, 1 is high.
      */
-    bool writeOutput(uint8_t pin, uint16_t location, int8_t value);
+    void writeOutputIrq(uint8_t pin, uint16_t location, int8_t value);
 
     /**
-     * @brief [brief description]
-     * @details [long description]
+     * @brief Set output pin value.
+     * @details All calls are processed through a FIFO queue.
      *
-     * @param pin [description]
-     * @param location [description]
-     * @param value [description]
-     * @param callback [description]
+     * @param pin Zero indexed pin number.
+     * @param location Address for external I/O device. For I2C devices,
+     *                 the I2C address is the location.
+     * @param value pin value. 0 is low, 1 is high.
+     */
+    void writeOutputTask(uint8_t pin, uint16_t location, int8_t value);
+
+    /**
+     * @brief Set output pin value.
+     * @details All calls are processed through a FIFO queue. A callback function
+     *          is called when the command has been processed.
+     *
+     * @param pin Zero indexed pin number.
+     * @param location Address for external I/O device. For I2C devices,
+     *                 the I2C address is the location.
+     * @param value pin value. 0 is low, 1 is high.
+     * @param callback Function to be called when command has been processed.
+     * @return bool true command accepted by location, false location not found.
      */
     bool writeOutput(uint8_t pin, uint16_t location, int8_t value, FunctionPointer0<void> callback);
 
     /**
-     * @brief [brief description]
-     * @details [long description]
+     * @brief Set pin direction.
+     * @details All calls are processed through a FIFO queue.
      *
-     * @param pin [description]
-     * @param location [description]
+     * @param pin Zero indexed pin number.
+     * @param location Address for external I/O device. For I2C devices,
+     *                 the I2C address is the location.
+     * @param direction 0 is input, 1 is output.
      *
-     * @return [description]
+     * @return bool true command accepted by location, false location not found.
      */
     bool setDirection(uint8_t pin, uint16_t location, int8_t direction);
+
+    /**
+     * @brief Enable interrupts on pin at location.
+     * @details This call sets the pin direction to input.
+     *
+     * @param pin Zero indexed pin number.
+     * @param location Address for external I/O device. For I2C devices,
+     *                 the I2C address is the location.
+     * @param callback Function to be called with pin value upon change.
+     * @return bool true command accepted by location, false location not found.
+     */
+    bool enableInterrupt(uint8_t pin, uint16_t location, FunctionPointer1<void, int> callback);
+
+    /**
+     * @brief Disable interrupts on pin at location.
+     *
+     * @param pin Zero indexed pin number.
+     * @param location Address for external I/O device. For I2C devices,
+     *                 the I2C address is the location.
+     *
+     * @return bool true command accepted by location, false location not found.
+     */
+    bool disableInterrupt(uint8_t pin, uint16_t location);
 }
 
 #endif // __WRD_GPIO_SWITCH_H__
