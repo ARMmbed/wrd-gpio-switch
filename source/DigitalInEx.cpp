@@ -58,8 +58,6 @@ int DigitalInEx::read(void)
         FunctionPointer1<void, int> fp(this, &DigitalInEx::updateCache);
         GPIOSwitch::readInput(pin, location, fp);
 
-        printf("ccccc: %d\r\n", cache);
-
         return cache;
     }
     else
@@ -95,6 +93,5 @@ void DigitalInEx::mode(PinMode pull)
 
 void DigitalInEx::updateCache(int value)
 {
-    printf("update: %d\r\n", value);
     cache = value;
 }

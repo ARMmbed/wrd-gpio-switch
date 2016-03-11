@@ -122,8 +122,6 @@ void InterruptInEx::disable_irq()
 
 void InterruptInEx::interruptHandler(int _value)
 {
-    printf("%d\r\n", _value);
-
     value = _value;
 
     if (value == 0)
