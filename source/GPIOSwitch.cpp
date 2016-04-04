@@ -247,13 +247,14 @@ static GPIOExpander gpio[2] = { { YOTTA_CFG_HARDWARE_WRD_GPIO_EXPANDER_GPIO0_I2C
     {
         for (uint8_t position = 0; position < 32; position++)
         {
-            uint8_t pin = (pins >> position) & 0x01;
+            uint8_t pinbit = (pins >> position) & 0x01;
 
-            if (pin)
+            /* Note: the interruptMapIndex is calculated based on the (pin) position
+            */
+            if (pinbit)
             {
-                uint32_t index = ((uint32_t)location << 16) | pin;
-
-                callbackIterator_t result = interruptMap.find(index);
+                uint32_t interruptMapIndex = ((uint32_t)location << 16) | ((uint32_t)0x01 << position);
+                callbackIterator_t result = interruptMap.find(interruptMapIndex);
 
                 if (result != interruptMap.end())
                 {
@@ -489,8 +490,8 @@ bool GPIOSwitch::disableInterrupt(uint8_t pin, uint16_t location)
                 .tolerance(1);
 
             // remove external callback function
-            uint32_t index = ((uint32_t)location << 16) | ((uint32_t)0x01 << pin);
-            interruptMap.erase(index);
+            uint32_t interruptMapIndex = ((uint32_t)location << 16) | ((uint32_t)0x01 << pin);
+            interruptMap.erase(interruptMapIndex);
 
             result = true;
             break;
